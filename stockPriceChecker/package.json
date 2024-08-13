@@ -2,11 +2,15 @@
   "name": "stock-price-checker",
   "version": "0.0.1",
   "description": "InfoSec project for freeCodeCamp",
+  "main": "assertion-analyser.js",
   "scripts": {
-    "start": "node server.js",
-    "watch": "api.js"
+    "start": "nodemon server.js",
+    "watch": "app.js",
+    "test": "mocha --timeout 5000 --require @babel/register --recursive --exit --ui tdd tests/"
   },
   "dependencies": {
+    "@babel/register": "^7.24.6",
+    "axios": "^1.7.2",
     "body-parser": "^1.15.2",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
@@ -14,7 +18,8 @@
     "dotenv": "^8.2.0",
     "express": "^4.14.0",
     "helmet": "^3.1.0",
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "nodemon": "^2.0.22"
   },
   "repository": {
     "type": "git",
@@ -29,7 +34,6 @@
     "url": "https://github.com/freeCodeCamp/boilerplate-project-stockchecker/issues"
   },
   "homepage": "https://github.com/freeCodeCamp/boilerplate-project-stockchecker#readme",
-  "main": "assertion-analyser.js",
   "directories": {
     "test": "tests"
   },

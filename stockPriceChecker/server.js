@@ -1,5 +1,6 @@
 'use strict';
 require('dotenv').config();
+const helmet = require('helmet')
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
@@ -16,6 +17,8 @@ app.use(cors({origin: '*'})); //For FCC testing purposes only
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(helmet.contentSecurityPolicy({directives:{scriptSrc:["'self'"],styleSrc:["'self'"]}}))
 
 //Index page (static HTML)
 app.route('/')
