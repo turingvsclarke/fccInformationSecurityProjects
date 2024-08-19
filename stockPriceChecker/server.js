@@ -4,7 +4,7 @@ const helmet = require('helmet')
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
-
+const myDB = require('./connection');
 const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
@@ -20,28 +20,42 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(helmet.contentSecurityPolicy({directives:{scriptSrc:["'self'"],styleSrc:["'self'"]}}))
 
-//Index page (static HTML)
-app.route('/')
+myDB(async client=>{
+  const myDatabase=await client.db('database').collection('ipAddresses');
+
+  app.route('/')
   .get(function (req, res) {
     res.sendFile(process.cwd() + '/views/index.html');
   });
+  console.log('About to route app')
+  apiRoutes(app, myDatabase);
+  //auth(app, myDatabase);
+
+  app.use((req,res,next)=>{
+    res.status(404).type('text').send('Not Found');
+  })
+ 
+}).catch(e=>{
+  app.route('/').get((req,res)=>{
+    res.render('index',{title: e,message:'Unable to connect to database'});
+  });
+});
+
+
+//Index page (static HTML)
+
 
 //For FCC testing purposes
 fccTestingRoutes(app);
 
 //Routing for API 
-apiRoutes(app);  
+//apiRoutes(app);  
     
-//404 Not Found Middleware
-app.use(function(req, res, next) {
-  res.status(404)
-    .type('text')
-    .send('Not Found');
-});
 
 //Start our server and tests!
 const listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
+  /*** 
   if(process.env.NODE_ENV==='test') {
     console.log('Running Tests...');
     setTimeout(function () {
@@ -53,6 +67,7 @@ const listener = app.listen(process.env.PORT || 3000, function () {
       }
     }, 3500);
   }
+  **/
 });
 
 module.exports = app; //for testing

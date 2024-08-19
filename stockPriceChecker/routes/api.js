@@ -1,7 +1,9 @@
 'use strict';
 const axios=require('axios')
+const bcrypt=require('bcrypt')
+const myDB = require('../connection');
 
-module.exports = function (app) {
+module.exports = function (app,myDatabase) {
   // Set up Mongo Database
 
   app.route('/api/stock-prices')
@@ -9,6 +11,40 @@ module.exports = function (app) {
       var stockSymbol
       var likes=0
       var array=false
+
+      // Get the ip address from the request object
+      let address=req.socket.remoteAddress
+      var ip_address='';
+
+      // Check the database for that 
+
+      var salt = bcrypt.genSaltSync(10);
+      bcrypt.hash(address,salt,(err,hash)=>{
+        console.log('address: ',address)
+        console.log('hash: ',hash)
+        bcrypt.compare(address,hash,function(err,isMatch){
+          if(isMatch){
+            console.log('addresses match')
+          }
+        });
+      })
+
+      
+      myDatabase.findOne({ip_address:'bunny' }, (err, user) => {
+        console.log(`User ${address} attempted to log in.`);
+        if (err) return done(err);
+        if (!user || !bcrypt.compareSync(password,user.password)){
+          wrongInfo=true;
+          return done(null, false);
+        }
+        return done(null, user);
+      });
+      
+      // Store that ip address in the database. 
+      // Check database for that ip address. Unhash it and then compare
+
+
+
       if(typeof(req.query.stock)=='object'){
         array=true
         stockSymbol=String(req.query.stock[0]).toLowerCase();
