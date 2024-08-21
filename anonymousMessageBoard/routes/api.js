@@ -13,7 +13,7 @@ module.exports = function (app) {
   app.route('/api/threads/:board').post((req,res)=>{
     // Form data includes text, delete_password
     insertThread(req.body.text,req.body.delete_password,req.params.board);
-    res.redirect('/api/threads/'+req.params.board)
+    res.redirect('/')
   });
 
 
@@ -23,7 +23,7 @@ module.exports = function (app) {
   app.route('/api/replies/:board').post((req,res)=>{
     // Search the database using the board and thread id
     insertReply(req.body.text,req.body.delete_password,req.body.thread_id).then(()=>{
-      res.redirect('/api/replies/:board');
+      res.redirect('/');
     })
   });
 
