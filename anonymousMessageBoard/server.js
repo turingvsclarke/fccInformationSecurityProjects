@@ -4,11 +4,25 @@ const express     = require('express');
 const bodyParser  = require('body-parser');
 const cors        = require('cors');
 
-const apiRoutes         = require('../api.js');
+const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
+const helmet = require('helmet');
 
 const app = express();
+
+// Security features
+app.use(helmet());
+app.use(helmet.dnsPrefetchControl({ allow: true })); 
+app.use(helmet.referrerPolicy({ policy: 'same-origin' })); 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      "script-src":["'self'"],
+      "frame-ancestors": ["'self'"] // Allow iframes only from the same origin
+    }
+  }
+}));
 
 app.use('/public', express.static(process.cwd() + '/public'));
 

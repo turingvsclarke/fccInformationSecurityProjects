@@ -1,8 +1,8 @@
 'use strict';
 
-import {insertThread,insertReply,getThread,getThreadsFromBoard,deleteThread,deleteReply,reportThread,reportReply} from '../database.js';
+const {insertThread,insertReply,getThread,getThreadsFromBoard,deleteThread,deleteReply,reportThread,reportReply} = require('../database.js');
 
-export function apiRoutes(app) {
+module.exports = function (app) {
   
   app.route('/api/threads/:board');
     
@@ -12,7 +12,7 @@ export function apiRoutes(app) {
  
   app.route('/api/threads/:board').post((req,res)=>{
     // Form data includes text, delete_password
-    insertThread(req.body.text,req.body.delete_password,req.params.board);
+    insertThread(req.params.board,req.body.text,req.body.delete_password);
     res.redirect('/')
   });
 
@@ -22,7 +22,7 @@ export function apiRoutes(app) {
   // In the thread's replies array, an object will be saved with at least the properties _id, text, created_on, delete_password, & reported.
   app.route('/api/replies/:board').post((req,res)=>{
     // Search the database using the board and thread id
-    insertReply(req.body.text,req.body.delete_password,req.body.thread_id).then(()=>{
+    insertReply(req.params.board,req.body.thread_id,req.body.text,req.body.delete_password).then(()=>{
       res.redirect('/');
     })
   });
