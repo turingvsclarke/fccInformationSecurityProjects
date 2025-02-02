@@ -15,13 +15,26 @@ const db=client.db('MessageBoard')
 //await db.admin({listDatabases:1});
 
 const testThreads=db.collection('fcc_test');
+const board_name='Gamers';
+// Insert 20 threads into the database with 6 replies each. 
+
+
+
 
 //const thread=await testThreads.findOne({text:'fcc_test_thread'});
 //console.log(thread.replies);
-
+// Async function here that exports the threads
+/** 
+var threads=await db.collection(board_name).find().toArray((err,threads)=>threads);
+    //threads=[...threads];
+    threads.sort((thread1,thread2)=>thread1.bumped_on-thread2.bumped_on);
+    export threads[0]._id;
+    export threads[1]._id;
+**/
 //const report=await reportReply('fcc_test','66e8a3056f9fb2ecc728c5b6',0);
 //console.log(report);
 module.exports={
+db, 
 insertThread: async function(board_name,text,delete_password){
     await db.collection(board_name).insertOne({
         text: text,
@@ -57,18 +70,20 @@ getThreadsFromBoard: async function(board_name){
     // For each thread, grab the first 
     var threads=[];
     var threads=await db.collection(board_name).find().toArray((err,threads)=>threads);
-    console.log(threads);
     //threads=[...threads];
     threads.sort((thread1,thread2)=>thread1.bumped_on-thread2.bumped_on);
     threads=threads.slice(0,10);
-    threads.forEach(thread=>{
+    threads=threads.map(thread=>{
         delete thread.reported;
         delete thread.delete_password;
-        let replies=thread.replies.sort((reply1,reply2)=>reply1.created_on-reply2.created_on).slice(0,3);
-        replies.forEach(reply=>{
+        let replies=[...thread.replies.sort((reply1,reply2)=>reply1.created_on-reply2.created_on).slice(0,3)];
+        replies=replies.map(reply=>{
             delete reply.delete_password;
             delete reply.reported;
+            return reply;
         });
+        thread.replies=[...replies];
+        return thread;
     });
     return threads;
 },
@@ -76,13 +91,15 @@ getThreadsFromBoard: async function(board_name){
 getThread: async function(board_name,thread_id){
     thread_id=new ObjectId(thread_id);
     var thread=await db.collection(board_name).findOne({_id:thread_id});
-    thread={...thread};
-    delete thread.reported;
-    delete thread.delete_password;
-    thread.replies.forEach(reply=>{
-        delete reply.delete_password;
-        delete reply.reported;
-    })
+    if(thread){
+        thread={...thread};
+        delete thread.reported;
+        delete thread.delete_password;
+        thread.replies.forEach(reply=>{
+            delete reply.delete_password;
+            delete reply.reported;
+        })
+    }
     return thread;
 },
 
@@ -147,3 +164,42 @@ reportReply: async function(board_name,thread_id,reply_id){
 }
 
 }
+/** 
+db.collection('Gamers').deleteMany().then(()=>{
+    let threads=[]
+    for(let i=0;i<20;i++){
+        let thread_text="TestThread"+i;
+        let delete_password="delete_me";
+        // Create replies array
+        replies=[];
+        // Generate a reply
+        for(let i=0;i<6;i++){
+            let reply={
+                _id:i,
+                text:'Reply'+i,
+                created_on:new Date(),
+                delete_password:'delete_me',
+                reported:false
+            };
+            replies.push(reply);
+        }
+        let thread={
+            text: thread_text,
+            created_on: new Date(),
+            bumped_on: new Date(),
+            reported: false,
+            delete_password: 'delete_me',
+            replies:replies
+        }
+        threads.push(thread);
+    }
+    db.collection(board_name).insertMany(threads).then(()=>{
+        db.collection(board_name).find().toArray((err,threads)=>{
+            threads.sort((thread1,thread2)=>thread1.bumped_on-thread2.bumped_on);
+            module.exports.thread1=threads[0]._id;
+            module.exports.thread2=threads[1]._id;
+        })
+    })
+
+})
+**/
