@@ -20,6 +20,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //For FCC testing purposes and enables user to connect from outside the hosting platform
 app.use(cors({origin: '*'})); 
 
+app.use(helmet());
+app.use(helmet.noCache());
+
+app.use((req,res,next)=>{
+  res.setHeader('X-Powered-By','PHP 7.4.3');
+  next();
+})
+
 // Index page (static HTML)
 app.route('/')
   .get(function (req, res) {
