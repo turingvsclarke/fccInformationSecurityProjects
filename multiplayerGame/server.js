@@ -13,9 +13,73 @@ const http=require('http').createServer(app);
 //const webServer = http.createServer(app);
 const io = require('socket.io')(http);
 
+let players=[];
+let playerCount=0;
+let id=0;
+// So when a user connect give them the current list of all players
 io.on('connection',socket=>{
-  console.log('A user has connected')
-})
+  var player;
+  //console.log('player connected');
+  socket.emit('players',(players));
+  socket.on('new player',(player)=>{
+    player=player;
+    players.push(player);
+    io.emit('players',(players));
+  
+    socket.on('player change',info=>{
+      if(info.event=='move'){
+        // update the players array
+        player=info.player;
+        players=players.map(p=>{
+          if(info.player.id==p.id){
+            return player;
+          }else{
+            return p;
+          }
+        })
+        io.emit('players',(players));
+      }
+      if(info.event=='score'){
+        console.log('player scored');
+      }
+    });
+
+    socket.on('disconnect',()=>{
+      // Remove that player from the list of players
+      players=players.filter(p=>p.id!=player.id);
+      // Tell the other clients about it
+      io.emit('players',(players))
+    })
+  })
+  });
+
+
+  /*** 
+  
+  // What are the different events we need to watch out for??
+  
+   1. Connect with server
+   2. 
+   3. Player collides with item
+   4. Player's score changes
+   5. Disconnect with server
+  
+
+  
+
+  socket.emit('new player');
+  socket.on('player moved'){
+
+  };
+
+  socket.on('player disconnect'){
+
+  }
+  socket.on('player scored'){
+
+  }
+  **/
+
 
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use('/assets', express.static(process.cwd() + '/assets'));

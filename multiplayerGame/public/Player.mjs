@@ -1,5 +1,5 @@
 class Player {
-  constructor({x, y, score, id}) {
+  constructor(x, y, score, id) {
     this.x=x;
     this.y=y;
     this.score=score;
@@ -9,15 +9,17 @@ class Player {
   movePlayer(dir, speed) {
     switch(dir) {
       case 'left':
-        this.x++;
+        this.x-=speed;
         break;
       case 'right':
-        this.x--;
+        this.x+=speed;
         break;
       case 'up':
-        this.y++;
+        this.y-=speed;
+        break;
       case 'down':
-        this.y--;
+        this.y+=speed;
+        break;
     }
   }
 
