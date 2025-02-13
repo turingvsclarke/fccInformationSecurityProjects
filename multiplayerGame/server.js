@@ -16,10 +16,13 @@ const io = require('socket.io')(http);
 let players=[];
 let playerCount=0;
 let id=0;
+var collectible;
 // So when a user connect give them the current list of all players
 io.on('connection',socket=>{
   var player;
-  //console.log('player connected');
+  if(collectible){
+    socket.emit('collectible',(collectible));
+  }
   socket.emit('players',(players));
   socket.on('new player',(player)=>{
     player=player;
@@ -40,7 +43,16 @@ io.on('connection',socket=>{
         io.emit('players',(players));
       }
       if(info.event=='score'){
-        console.log('player scored');
+        player=info.player;
+        players=players.map(p=>{
+          if(info.player.id==p.id){
+            return player;
+          }else{
+            return p;
+          }
+        });
+        io.emit('players',(players));
+        io.emit('collectible',(info.collectible));
       }
     });
 
@@ -51,34 +63,15 @@ io.on('connection',socket=>{
       io.emit('players',(players))
     })
   })
+  socket.on('collectible',(received_collectible)=>{
+    if(received_collectible){
+      collectible=received_collectible;
+    }
+    io.emit('collectible',(collectible));
+  })
   });
 
 
-  /*** 
-  
-  // What are the different events we need to watch out for??
-  
-   1. Connect with server
-   2. 
-   3. Player collides with item
-   4. Player's score changes
-   5. Disconnect with server
-  
-
-  
-
-  socket.emit('new player');
-  socket.on('player moved'){
-
-  };
-
-  socket.on('player disconnect'){
-
-  }
-  socket.on('player scored'){
-
-  }
-  **/
 
 
 app.use('/public', express.static(process.cwd() + '/public'));

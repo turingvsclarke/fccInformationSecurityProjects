@@ -24,15 +24,16 @@ class Player {
   }
 
   collision(item) {
-    if(item.x==this.x&&item.y==this.y)
+    if((item.x<this.x+10)&&(item.x>this.x-10)&&(item.y<this.y+10)&&(item.y>this.y-10)){
       return true;
+    }
     return false;
   }
 
   calculateRank(arr) {
-    playerScore=arr.sort((a,b)=>{return b.score-a.score});
-    let rank=playerScore.index(this)+1;
-    return rank/playerScore;
+    let playerScores=arr.sort((a,b)=>{return b.score-a.score});
+    let rank=1+playerScores.findIndex(p=>p.id==this.id);
+    return rank+ ' / ' + playerScores.length;
   }
 }
 
